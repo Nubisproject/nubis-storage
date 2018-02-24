@@ -2,8 +2,8 @@
 
 export PATH=/usr/local/bin:$PATH
 
-eval `curl -fq http://169.254.169.254/latest/user-data`
-REGION=`curl -sfq http://169.254.169.254/latest/dynamic/instance-identity/document | jq '.region' -r`
+eval "$(curl -fq http://169.254.169.254/latest/user-data)"
+REGION="$(curl -sfq http://169.254.169.254/latest/dynamic/instance-identity/document | jq '.region' -r)"
 
 # This starts our Ceph Monitor
 /usr/local/bin/nubis-ceph-bootstrap-mon
@@ -17,9 +17,9 @@ REGION=`curl -sfq http://169.254.169.254/latest/dynamic/instance-identity/docume
 # Thinking about this, we should possibly just wait for positive quorom to be
 # verified, this might help handle the situation when we lose a node...
 
-MON_COUNT=`ceph mon dump -f json 2>/dev/null | jq '.mons | length' || echo -1`
+MON_COUNT="$(ceph mon dump -f json 2>/dev/null | jq '.mons | length' || echo -1)"
 while [ "${MON_COUNT:-0}" -lt "$NUBIS_STORAGE_CLUSTER_SIZE" ]; do
- MON_COUNT=`ceph mon dump -f json 2>/dev/null | jq '.mons | length' || echo -1`
+ MON_COUNT="$(ceph mon dump -f json 2>/dev/null | jq '.mons | length' || echo -1)"
  sleep 1
 done
 
@@ -38,5 +38,5 @@ done
 
 # Signal completion to CloudFormation
 echo "Signaling CloudFormation stack $NUBIS_STORAGE_STACK_NAME we are done"
-cfn-signal --stack=$NUBIS_STORAGE_STACK_NAME --region=$REGION --resource=AutoScalingGroup
+cfn-signal --stack="$NUBIS_STORAGE_STACK_NAME" --region="$REGION" --resource=AutoScalingGroup
 
